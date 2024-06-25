@@ -5,9 +5,10 @@ function ContactForm() {
   const [contacts, setContacts] = useState([]);
 
   useEffect(() => {
+    // Fetch contacts data from backend API on component mount
     axios.get('https://adminpanel-backend-ntkm.onrender.com/getContacts')
-      .then(contacts => setContacts(contacts.data))
-      .catch(err => console.log(err));
+      .then(response => setContacts(response.data))
+      .catch(err => console.error('Error fetching contacts:', err));
   }, []);
 
   const handleSendMail = (email) => {
@@ -15,9 +16,10 @@ function ContactForm() {
     console.log(`Sending mail to ${email}`);
   };
 
-  const handleDeleteContact = async (contactId) => {
+  const handleDeleteContact = async (contactId, name) => {
     if (window.confirm(`Are you sure you want to delete the contact for ${name}?`)) {
       try {
+        // Send delete request to backend API
         await axios.delete(`https://adminpanel-backend-ntkm.onrender.com/deleteContact/${contactId}`);
 
         // Update local state immediately (optimistic update)
@@ -28,51 +30,49 @@ function ContactForm() {
         // Handle errors appropriately (e.g., display an error message to the user)
       }
     } else {
-      // User canceled deletion
+      // User cancelled deletion
       console.log('Deletion cancelled');
     }
-
-
-
   };
 
   return (
     <div className="container mx-auto">
       <div className='bg-gray-700 h-20 flex items-center justify-center mb-10'>
-            <h1 className='text-center text-white text-3xl font-black'>Contact Form </h1>
-            </div>
+        <h1 className='text-center text-white text-3xl font-black'>Contact Form</h1>
+      </div>
+      
       <div className="overflow-x-auto">
-        <table className="mx-auto max-w-4xl w-full whitespace-nowrap rounded-lg bg-white divide-y divide-gray-300 overflow-hidden shadow-lg">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm uppercase border-b">Name</th>
-              <th className="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm uppercase border-b">Mobile No</th>
-              <th className="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm uppercase border-b">Email</th>
-              <th className="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm uppercase border-b">Address</th>
-              <th className="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm uppercase border-b">Type</th>
-              <th className="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm uppercase border-b">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200">
-            {
-              contacts.map(contact => {
-                return (
-                  <tr key={contact.id} className="hover:bg-gray-100 transition-colors duration-200">
-                    <td className="px-4 py-3">{contact.name}</td>
-                    <td className="px-4 py-3">{contact.mobile}</td>
-                    <td className="px-4 py-3">{contact.email}</td>
-                    <td className="px-4 py-3">{contact.address}</td>
-                    <td className="px-4 py-3">{contact.type}</td>
-                    <td className="px-4 py-3 flex justify-around">
-                      <button onClick={() => handleSendMail(contact.email)} className="text-white bg-indigo-500 border-0 py-2 px-4 focus:outline-none hover:bg-indigo-600 rounded text-sm transition-colors duration-200">Send Mail</button>
-                      <button onClick={() => handleDeleteContact(contact._id)} className="text-white bg-red-500 border-0 py-2 px-4 focus:outline-none hover:bg-red-600 rounded text-sm transition-colors duration-200">Delete</button>
+        <div className="max-w-full mx-auto">
+          <div className="overflow-hidden">
+            <table className="min-w-full bg-white rounded-lg overflow-hidden shadow-lg">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mobile No</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Address</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {contacts.map(contact => (
+                  <tr key={contact._id} className="bg-white">
+                    <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{contact.name}</td>
+                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{contact.mobile}</td>
+                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{contact.email}</td>
+                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{contact.address}</td>
+                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{contact.type}</td>
+                    <td className="px-4 py-4 whitespace-nowrap text-sm font-medium">
+                      <button onClick={() => handleSendMail(contact.email)} className="inline-block bg-indigo-500 text-white px-3 py-1 rounded-md text-xs font-medium hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500">Send Mail</button>
+                      <button onClick={() => handleDeleteContact(contact._id, contact.name)} className="inline-block bg-red-500 text-white px-3 py-1 rounded-md text-xs font-medium ml-2 hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500">Delete</button>
                     </td>
                   </tr>
-                );
-              })
-            }
-          </tbody>
-        </table>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
   );
